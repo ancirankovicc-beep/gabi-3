@@ -1,73 +1,61 @@
 const { EmbedBuilder } = require('discord.js');
-const fs = require('fs');
-const path = require('path');
-const shiva = require('../../shiva');
-
-const COMMAND_SECURITY_TOKEN = shiva.SECURITY_TOKEN;
 
 module.exports = {
     name: 'help',
-    aliases: ['h'],
-    description: 'List all available commands',
-    securityToken: COMMAND_SECURITY_TOKEN,
-
+    description: 'Prikaži listu dostupnih komandi',
     async execute(message, args, client) {
-        if (!shiva || !shiva.validateCore || !shiva.validateCore()) {
-            const embed = new EmbedBuilder()
-                .setDescription('❌ System core offline - Command unavailable')
-                .setColor('#FF0000');
-            return message.reply({ embeds: [embed] }).catch(() => {});
-        }
+        const embed = new EmbedBuilder()
+            .setTitle('📖 Lista komandi – Ultimate Music Bot')
+            .setColor('#1DB954')
+            .setDescription('Bot statistika: Aktivan na **1** serveru.\n\n')
+            .addFields(
+                {
+                    name: '💬 Tekstualne komande [18]',
+                    value: `
+\`!clear\` – Očisti red pesama  
+\`!help\` – Prikaži sve komande  
+\`!join\` – Pridruži se tvom glasovnom kanalu  
+\`!jump\` – Preskoči na određenu pesmu u redu  
+\`!loop\` – Podesi ponavljanje (isključeno, pesma, red)  
+\`!move\` – Premesti pesmu u redu  
+\`!nowplaying\` – Prikaži trenutno puštenu pesmu  
+\`!pause\` – Pauziraj trenutnu pesmu  
+\`!ping\` – Proveri latenciju i uptime bota  
+\`!play\` – Pusti pesmu ili dodaj u red  
+\`!queue\` – Prikaži red pesama  
+\`!remove\` – Ukloni pesmu iz reda  
+\`!resume\` – Nastavi pauziranu muziku  
+\`!shuffle\` – Izmešaj red  
+\`!skip\` – Preskoči trenutnu pesmu  
+\`!stop\` – Zaustavi muziku i izađi iz kanala  
+\`!support\` – Podrška i kontakt  
+\`!volume\` – Podesi jačinu zvuka (1–100)
+`
+                },
+                {
+                    name: '⚡ Slash komande [16]',
+                    value: `
+\`/autoplay\` – Uključi/isključi autoplay  
+\`/clean-up\` – Ručno sakupljanje memorije (owner)  
+\`/clear\` – Očisti red pesama  
+\`/disable-central\` – Isključi centralni muzički sistem  
+\`/join\` – Pridruži se glasovnom kanalu  
+\`/loop\` – Podesi ponavljanje  
+\`/pause\` – Pauziraj pesmu  
+\`/play\` – Pusti ili dodaj pesmu  
+\`/queue\` – Prikaži red pesama  
+\`/remove\` – Ukloni pesmu  
+\`/resume\` – Nastavi muziku  
+\`/setup-central\` – Podesi centralni sistem  
+\`/shuffle\` – Izmešaj red  
+\`/skip\` – Preskoči pesmu  
+\`/stop\` – Zaustavi muziku  
+\`/volume\` – Podesi jačinu zvuka
+`
+                }
+            )
+            .setFooter({ text: 'Gabi Music Bot • Developed by Živojinović' });
 
-        message.shivaValidated = true;
-        message.securityToken = COMMAND_SECURITY_TOKEN;
-
-        try {
-            const msgCommandsPath = path.join(__dirname, '..', 'message');
-            const msgFiles = fs.readdirSync(msgCommandsPath).filter(file => file.endsWith('.js'));
-            const messageCommands = msgFiles.map(file => {
-                const cmd = require(path.join(msgCommandsPath, file));
-                return { name: cmd.name || 'Unknown', description: cmd.description || 'No description' };
-            });
-
-            const slashCommandsPath = path.join(__dirname, '..', 'slash');
-            const slashFiles = fs.readdirSync(slashCommandsPath).filter(file => file.endsWith('.js'));
-            const slashCommands = slashFiles.map(file => {
-                const cmd = require(path.join(slashCommandsPath, file));
-                return {
-                    name: cmd.data?.name || 'Unknown',
-                    description: cmd.data?.description || 'No description'
-                };
-            });
-
-            let description = `**🌐 Bot Stats:** Serving in **${client.guilds.cache.size}** servers.\n\n`;
-
-            description += `**💬 Message Commands [${messageCommands.length}]:**\n`;
-            messageCommands.forEach(cmd => {
-                description += `- \`!${cmd.name}\` - ${cmd.description}\n`;
-            });
-
-            description += `\n**⚡ Slash Commands [${slashCommands.length}]:**\n`;
-            slashCommands.forEach(cmd => {
-                description += `- \`/${cmd.name}\` - ${cmd.description}\n`;
-            });
-
-            if (description.length > 4096) {
-                description = description.slice(0, 4093) + '...';
-            }
-
-            const embed = new EmbedBuilder()
-                .setTitle('📖 Ultimate Music Bot - Command List')
-                .setColor(0x1DB954)
-                .setDescription(description)
-                .setFooter({ text: 'Developed by GlaceYT | https://glaceyt.com' })
-                .setTimestamp();
-
-            await message.reply({ embeds: [embed] });
-
-        } catch (error) {
-            console.error('Help command error:', error);
-            await message.reply('❌ An error occurred while fetching commands.');
-        }
+        message.channel.send({ embeds: [embed] });
     }
 };
